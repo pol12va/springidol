@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+
+    <!--<bean id="duke" class="com.qulix.spring.performer.impl.Juggler">-->
+        <!--<constructor-arg value="15"/>-->
+    <!--</bean>-->
+
+    <bean id="sonnet29"
+          class="com.qulix.spring.poem.impl.Sonnet29"/>
+
+    <bean id="poeticDuke"
+          class="com.qulix.spring.performer.impl.PoeticJuggler"
+            autowire="constructor">
+        <constructor-arg value="15"/>
+    </bean>
+
+    <bean id="stage"
+          class="com.qulix.spring.place.Stage"
+          factory-method="getInstance">
+        <property name="square" value="#{T(java.lang.Math).PI * 2 ^ 2}"/>
+    </bean>
+
+    <bean id="ticket"
+          class="com.qulix.spring.place.Ticket"
+          scope="prototype"/>
+
+    <bean id="auditorium"
+          class="com.qulix.spring.place.Auditorium"
+          init-method="turnOnLights"
+          destroy-method="turnOffLights"/>
+
+    <bean id="kenny"
+          class="com.qulix.spring.performer.impl.Instrumentalist"
+          p:song="Jingle Bells"
+          autowire="byType">
+        <property name="age"
+                  value="37"/>
+    </bean>
+
+    <bean id="hank"
+          class="com.qulix.spring.performer.impl.OneManBand">
+        <property name="instruments">
+            <map>
+                <entry key="GUITAR" value-ref="guitar"/>
+                <entry key="CYMBAL" value-ref="cymbal"/>
+                <entry key="HARMONICA" value-ref="harmonica"/>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="carl"
+          class="com.qulix.spring.performer.impl.Instrumentalist">
+        <property name="song" value="#{kenny.song ?: 'Greensleves'}"/>
+        <property name="instrument" value="#{carl.song != 'jingle bells' ? piano : saxophone}"/>
+        <property name="age" value="#{kenny.age + 5}"/>
+    </bean>
+
+    <bean id="saxophone"
+          class="com.qulix.spring.instrument.impl.Saxophone"
+            primary="true"/>
+
+    <bean id="piano"
+          class="com.qulix.spring.instrument.impl.Piano"
+          autowire-candidate="false"/>
+
+    <bean id="guitar"
+          class="com.qulix.spring.instrument.impl.Guitar"/>
+
+    <bean id="cymbal"
+          class="com.qulix.spring.instrument.impl.Cymbal"/>
+
+    <bean id="harmonica"
+          class="com.qulix.spring.instrument.impl.Harmonica"/>
+
+    <!--<bean id="audience"-->
+          <!--class="com.qulix.spring.people.Audience"/>-->
+
+    <bean id="volunteer"
+          class="com.qulix.spring.people.impl.Volunteer"/>
+
+    <bean id="magician"
+          class="com.qulix.spring.performer.impl.Magician"/>
+
+    <bean id="criticismEngine"
+          class="com.qulix.spring.criticism.CriticismEngineImpl">
+        <property name="criticismPool">
+            <list>
+                <value>I’m not being rude, but that was appalling</value>
+                <value>>You may be the least talented person in this show.</value>
+                <value>Do everyone a favor and keep your day job.</value>
+            </list>
+        </property>
+    </bean>
+
+    <aop:aspectj-autoproxy />
+    <!-- Aspect configuration -->
+    <aop:config proxy-target-class="true">
+        <!--<aop:aspect ref="audience">-->
+            <!--<aop:pointcut id="performance" expression="execution(* com.qulix.spring.performer.Performer.perform(..))"/>-->
+
+            <!--<aop:around pointcut-ref="performance"-->
+                        <!--method="watchPerformance"/>-->
+        <!--</aop:aspect>-->
+
+        <aop:aspect ref="magician">
+            <aop:pointcut id="thinking" expression="execution(* com.qulix.spring.people.Thinker.thinkOfSomething(String)) and args(thoughts)"/>
+
+            <aop:before pointcut-ref="thinking"
+                        method="interceptThoughts"
+                        arg-names="thoughts"/>
+        </aop:aspect>
+
+        <aop:aspect>
+            <aop:declare-parents types-matching="com.qulix.spring.performer.Performer+"
+                                 implement-interface="com.qulix.spring.performer.Contestant"
+                                    default-impl="com.qulix.spring.performer.impl.GraciousContestant"/>
+        </aop:aspect>
+    </aop:config>
+</beans>
